@@ -1,0 +1,657 @@
+BFS
+*******************
+from collections import deque
+
+graph = {
+    1: [2, 3],
+    2: [4],
+    3: [4],
+    4: [5],
+    5: []
+}
+
+def bfs(graph, start):
+    visited = set()
+    queue = deque([start])
+    result = []
+
+    while queue:
+        node = queue.popleft()
+        if node not in visited:
+            visited.add(node)
+            result.append(node)
+            queue.extend(graph[node])
+
+    return result
+
+bfs_result = bfs(graph, 1)
+print("BFS:", bfs_result)
+
+*************************
+DFS 
+*************************
+from collections import deque
+
+graph = {
+    1: [2, 3],
+    2: [4],
+    3: [4],
+    4: [5],
+    5: []
+}
+
+def dfs(graph, start):
+    visited = set()
+    stack = [start]
+    result = []
+
+    while stack:
+        node = stack.pop()
+        if node not in visited:
+            visited.add(node)
+            result.append(node)
+            stack.extend(neighbor for neighbor in graph[node] if neighbor not in visited)
+
+    return result
+
+dfs_result = dfs(graph, 1)
+print("DFS:", dfs_result)
+*******************************
+Topological_Sort.py
+********************************
+from collections import deque
+
+graph = {
+    1: [2, 3],
+    2: [4],
+    3: [4],
+    4: [5],
+    5: []
+}
+
+def topological_sort(graph):
+    in_degree = {node: 0 for node in graph}
+    for node in graph:
+        for neighbor in graph[node]:
+            in_degree[neighbor] += 1
+
+    queue = deque(node for node in in_degree if in_degree[node] == 0)
+    result = []
+
+    while queue:
+        node = queue.popleft()
+        result.append(node)
+        for neighbor in graph[node]:
+            in_degree[neighbor] -= 1
+            if in_degree[neighbor] == 0:
+                queue.append(neighbor)
+
+    return result
+
+topological_result = topological_sort(graph)
+print("Topological Sort:", topological_result)
+***********************************************
+You are given with a connected and undirected simple graph
+with N vertices and M edges. Your task is to direct each edge in one of
+two possible directions in such a way that the indegrees of all vertices of
+the resulting graph are even. The indegree of a vertex is the number of
+edges directed to that vertex from another vertex. Find one possible way
+to direct them or determine that it is impossible under the given
+conditions. The graph on the input is connected, does not contain multiple
+edges or self-loops.
+
+******************************************************
+def solve(n, m, edges):
+    graph = [[] for _ in range(n + 1)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+
+    visited = [0] * (n + 1)
+    directions = {}
+    set_A = set()
+    set_B = set()
+
+    def dfs(node, current_set):
+        visited[node] = current_set
+        if current_set == 1:
+            set_A.add(node)
+        else:
+            set_B.add(node)
+
+        for neighbor in graph[node]:
+            if visited[neighbor] == 0:
+                if not dfs(neighbor, 3 - current_set): 
+                    return False
+            elif visited[neighbor] == current_set:
+                return False
+        return True
+
+    if not dfs(1, 1):
+        return -1
+
+    for u, v in edges:
+        if visited[u] == 1 and visited[v] == 2:
+            directions[(u, v)] = 0
+            directions[(v, u)] = 1
+        else:
+            directions[(u, v)] = 1
+            directions[(v, u)] = 0
+
+    result = [directions.get(edge, 0) for edge in edges]
+    return result
+**********************************************************************
+There are a total n tasks you must pick, labelled from 0 to n-1. Some
+tasks may have pre-requisites and for example to pick task 0 you have to
+first pick task 1, which is expressed as a pair [0, 1].
+**********************************************************************
+
+def dfs(node, graph, visited, directions):
+    visited[node] = True
+    for neighbor in graph[node]:
+        if not visited[neighbor]:
+            directions[(node, neighbor)] = 0
+            directions[(neighbor, node)] = 1
+            dfs(neighbor, graph, visited, directions)
+
+def solve(n, m, edges):
+    graph = [[] for _ in range(n + 1)]
+    for u, v in edges:
+        graph[u].append(v)
+        graph[v].append(u)
+    
+    visited = [False] * (n + 1)
+    directions = {}
+    
+    dfs(1, graph, visited, directions)
+    
+    for node in range(1, n + 1):
+        indegree = sum(directions.get((u, node), 0) for u in graph[node])
+        if indegree % 2 != 0:
+            return -1
+    
+    result = [directions.get(edge, 0) for edge in edges]
+    return result
+
+t = 1  
+test_cases = [
+    (4, 4, [(1, 2), (1, 3), (2, 4), (3, 4)]),
+    (3, 3, [(1, 2), (2, 3), (1, 3)])
+]
+
+for n, m, edges in test_cases:
+    result = solve(n, m, edges)
+    if result == -1:
+        print(-1)
+    else:
+        print(" ".join(map(str, result)))
+*********************************************************
+Binary_Tree_Detection
+*********************************************************
+class TreeNode:
+    def __init__(self, value):
+        self.value = value
+        self.left = None
+        self.right = None
+    
+def isMirror(left_subtree, right_subtree):
+    if left_subtree is None and right_subtree is None:
+        return True
+    
+    if left_subtree is None or right_subtree is None:
+        return False
+    
+    return (left_subtree.value == right_subtree.value) and \
+            isMirror(left_subtree.left, right_subtree.right) and \
+            isMirror(left_subtree.left, right_subtree.right)
+
+def isSymmetric(root):
+    if root is None:
+        return True
+    
+    return isMirror(root.left, root.right)
+    
+if __name__ == "__main__":
+    root1 = TreeNode(1)
+    root1.left = TreeNode(2)
+    root1.right = TreeNode(2)
+    root1.left.left = TreeNode(3)
+    root1.left.right = TreeNode(4)
+    root1.right.left = TreeNode(4)
+    root1.right.right = TreeNode(3)
+
+    root2 = TreeNode(1)
+    root2.left = TreeNode(2)
+    root2.right = TreeNode(3)
+    
+    root3 = TreeNode(1)
+
+    result = list(map(isSymmetric, [root1, root2, root3]))
+    print(result)
+*******************************************************************
+Puzzle_Game_States_up_to_a_Given_Level.py
+********************************************************************
+# AP21110010192
+
+from collections import deque
+
+GOAL_STATE = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+
+MOVES = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+
+def is_valid(x, y):
+    return 0 <= x < 3 and 0 <= y < 3
+
+def swap(board, x1, y1, x2, y2):
+    board[x1][y1], board[x2][y2] = board[x2][y2], board[x1][y1]
+
+def Create(initial_state, level):
+    visited = set()
+    queue = deque([(initial_state, 0)])
+
+    while queue:
+        current_state, current_level = queue.popleft()
+
+        if current_level > level:
+            break
+
+        print(f"Level {current_level}:")
+        for row in current_state:
+            print(row)
+
+        for x in range(3):
+            for y in range(3):
+                if current_state[x][y] == 0:
+                    for dx, dy in MOVES:
+                        new_x, new_y = x + dx, y + dy
+                        if is_valid(new_x, new_y):
+                            new_state = [list(row) for row in current_state]
+                            swap(new_state, x, y, new_x, new_y)
+                            new_state_tuple = tuple(tuple(row) for row in new_state)
+
+                            if new_state_tuple not in visited:
+                                visited.add(new_state_tuple)
+                                queue.append((new_state, current_level + 1))
+
+if __name__ == "__main__":
+    initial_state = [[1, 2, 3], [0, 4, 6], [7, 5, 8]]
+    level = 3
+    Create(initial_state, level)
+*****************************************************************
+Puzzle_State_Generation_with_Heuristic_Evaluation.py
+******************************************************************
+import copy
+
+goal_state = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+
+def heuristic(state):
+    misplaced_tiles = 0
+    for i in range(3):
+        for j in range(3):
+            if state[i][j] != goal_state[i][j]:
+                misplaced_tiles += 1
+    return misplaced_tiles
+
+def generate_new_states(current_state):
+    new_states = []
+    zero_row, zero_col = None, None
+
+    for i in range(3):
+        for j in range(3):
+            if current_state[i][j] == 0:
+                zero_row, zero_col = i, j
+                break
+
+    moves = [(0, 1), (0, -1), (1, 0), (-1, 0)]
+
+    for dr, dc in moves:
+        new_row, new_col = zero_row + dr, zero_col + dc
+
+        if 0 <= new_row < 3 and 0 <= new_col < 3:
+            new_state = copy.deepcopy(current_state)
+            new_state[zero_row][zero_col], new_state[new_row][new_col] = new_state[new_row][new_col], new_state[zero_row][zero_col]
+            new_states.append(new_state)
+
+    return new_states
+
+def Create(initial_state, level):
+    states_queue = [(initial_state, 0)]
+    visited = set()
+
+    while states_queue:
+        current_state, current_level = states_queue.pop(0)
+
+        if current_level > level:
+            break
+
+        print(f"Level {current_level}:\n", current_state)
+        print("Heuristic Value:", heuristic(current_state))
+        print()
+
+        visited.add(tuple(map(tuple, current_state)))
+        new_states = generate_new_states(current_state)
+
+        for new_state in new_states:
+            if tuple(map(tuple, new_state)) not in visited:
+                states_queue.append((new_state, current_level + 1))
+                visited.add(tuple(map(tuple, new_state)))
+
+if __name__ == "__main__":
+    initial_state = [[1, 2, 3], [0, 4, 6], [7, 5, 8]]
+    level = 2
+
+    Create(initial_state, level)
+*************************************************************************
+astar_8_puzzle_solver.py
+*************************************************************************
+import heapq
+
+class PuzzleNode:
+    def __init__(self, state, parent=None, move=None, level=0):
+        self.state = state
+        self.parent = parent
+        self.move = move
+        self.level = level
+        self.cost = self.calculate_cost()
+        
+    def calculate_cost(self):
+        cost = self.level
+        for i in range(3):
+            for j in range(3):
+                if self.state[i][j] != 0:
+                    x, y = divmod(self.state[i][j] - 1, 3)
+                    cost += abs(i - x) + abs(j - y)
+        return cost
+
+    def __lt__(self, other):
+        return self.cost < other.cost
+
+def is_valid(x, y):
+    return 0 <= x < 3 and 0 <= y < 3
+
+def get_neighbors(node):
+    x, y = None, None
+    for i in range(3):
+        for j in range(3):
+            if node.state[i][j] == 0:
+                x, y = i, j
+                break
+    
+    neighbors = []
+    moves = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    for dx, dy in moves:
+        new_x, new_y = x + dx, y + dy
+        if is_valid(new_x, new_y):
+            new_state = [list(row) for row in node.state]
+            new_state[x][y], new_state[new_x][new_y] = new_state[new_x][new_y], new_state[x][y]
+            neighbors.append(PuzzleNode(new_state, node, (dx, dy), node.level + 1))
+    return neighbors
+
+def a_star(initial_state, goal_state):
+    open_list = []
+    closed_set = set()
+    
+    initial_node = PuzzleNode(initial_state)
+    goal_node = PuzzleNode(goal_state)
+    
+    heapq.heappush(open_list, initial_node)
+    
+    while open_list:
+        current_node = heapq.heappop(open_list)
+        
+        if current_node.state == goal_node.state:
+            path = []
+            while current_node:
+                path.append(current_node.state)
+                current_node = current_node.parent
+            return list(reversed(path))
+        
+        closed_set.add(tuple(map(tuple, current_node.state)))
+        
+        for neighbor in get_neighbors(current_node):
+            if tuple(map(tuple, neighbor.state)) not in closed_set:
+                heapq.heappush(open_list, neighbor)
+    
+    return None
+
+
+if __name__ == "__main__":
+    initial_state = [[1, 2, 3], [4, 0, 5], [6, 7, 8]]
+    goal_state = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+
+    solution_path = a_star(initial_state, goal_state)
+    if solution_path:
+        for state in solution_path:
+            for row in state:
+                print(row)
+            print("-----")
+    else:
+        print("No solution found.")
+************************************************************
+astar_8_puzzle_solver.py
+*************************************************************
+import heapq
+
+class PuzzleNode:
+    def __init__(self, state, parent=None, move=None, level=0):
+        self.state = state
+        self.parent = parent
+        self.move = move
+        self.level = level
+        self.cost = self.calculate_cost()
+        
+    def calculate_cost(self):
+        cost = self.level
+        for i in range(3):
+            for j in range(3):
+                if self.state[i][j] != 0:
+                    x, y = divmod(self.state[i][j] - 1, 3)
+                    cost += abs(i - x) + abs(j - y)
+        return cost
+
+    def __lt__(self, other):
+        return self.cost < other.cost
+
+def is_valid(x, y):
+    return 0 <= x < 3 and 0 <= y < 3
+
+def get_neighbors(node):
+    x, y = None, None
+    for i in range(3):
+        for j in range(3):
+            if node.state[i][j] == 0:
+                x, y = i, j
+                break
+    
+    neighbors = []
+    moves = [(1, 0), (-1, 0), (0, 1), (0, -1)]
+    for dx, dy in moves:
+        new_x, new_y = x + dx, y + dy
+        if is_valid(new_x, new_y):
+            new_state = [list(row) for row in node.state]
+            new_state[x][y], new_state[new_x][new_y] = new_state[new_x][new_y], new_state[x][y]
+            neighbors.append(PuzzleNode(new_state, node, (dx, dy), node.level + 1))
+    return neighbors
+
+def a_star(initial_state, goal_state):
+    open_list = []
+    closed_set = set()
+    
+    initial_node = PuzzleNode(initial_state)
+    goal_node = PuzzleNode(goal_state)
+    
+    heapq.heappush(open_list, initial_node)
+    
+    while open_list:
+        current_node = heapq.heappop(open_list)
+        
+        if current_node.state == goal_node.state:
+            path = []
+            while current_node:
+                path.append(current_node.state)
+                current_node = current_node.parent
+            return list(reversed(path))
+        
+        closed_set.add(tuple(map(tuple, current_node.state)))
+        
+        for neighbor in get_neighbors(current_node):
+            if tuple(map(tuple, neighbor.state)) not in closed_set:
+                heapq.heappush(open_list, neighbor)
+    
+    return None
+
+
+if __name__ == "__main__":
+    initial_state = [[1, 2, 3], [4, 0, 5], [6, 7, 8]]
+    goal_state = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+
+    solution_path = a_star(initial_state, goal_state)
+    if solution_path:
+        for state in solution_path:
+            for row in state:
+                print(row)
+            print("-----")
+    else:
+        print("No solution found.")
+*********************************************************
+GA_TSP.py
+**************************************************************
+# AP21110010192
+
+import random
+
+cities = {
+    'A': (0, 0),
+    'B': (1, 3),
+    'C': (2, 1),
+    'D': (3, 6),
+    'E': (4, 2),
+    'F': (5, 5),
+    'G': (6, 0),
+    'H': (7, 4)
+}
+
+def initial_population(population_size):
+    population = []
+    for _ in range(population_size):
+        route = list(cities.keys())
+        random.shuffle(route)
+        population.append(route)
+    return population
+
+def calculate_total_distance(route):
+    total_distance = 0
+    for i in range(len(route) - 1):
+        city1 = route[i]
+        city2 = route[i + 1]
+        total_distance += distance_between_cities(cities[city1], cities[city2])
+    return total_distance
+
+def distance_between_cities(city1, city2):
+    x1, y1 = city1
+    x2, y2 = city2
+    return ((x1 - x2) ** 2 + (y1 - y2) ** 2) ** 0.5
+
+def select_parents(population):
+    parent1, parent2 = random.sample(population, 2)
+    return parent1, parent2
+
+def crossover(parent1, parent2):
+    start = random.randint(0, len(parent1) - 2)
+    end = random.randint(start + 1, len(parent1) - 1)
+    child = [None] * len(parent1)
+    for i in range(start, end + 1):
+        child[i] = parent1[i]
+    remaining_cities = [city for city in parent2 if city not in child]
+    j = 0
+    for i in range(len(child)):
+        if child[i] is None:
+            child[i] = remaining_cities[j]
+            j += 1
+    return child
+
+def mutate(route):
+    index1, index2 = random.sample(range(len(route)), 2)
+    route[index1], route[index2] = route[index2], route[index1]
+
+def genetic_algorithm(num_generations, population_size):
+    population = initial_population(population_size)
+    for generation in range(num_generations):
+        population = sorted(population, key=lambda x: calculate_total_distance(x))
+        best_route = population[0]
+        print(f"Generation {generation}: Best distance = {calculate_total_distance(best_route)}")
+        new_population = [best_route]
+
+        while len(new_population) < population_size:
+            parent1, parent2 = select_parents(population)
+            child = crossover(parent1, parent2)
+            if random.random() < 0.2:
+                mutate(child)
+            new_population.append(child)
+
+        population = new_population
+
+    return population[0]
+
+if __name__ == "__main__":
+    num_generations = 100
+    population_size = 50
+    best_route = genetic_algorithm(num_generations, population_size)
+    print("Best Route:", best_route)
+    print("Best Distance:", calculate_total_distance(best_route))
+**************************************************************************
+Problem_Set_8/Question_1.py
+*********************************
+# AP21110010192
+
+import re
+
+def count_chars_nums_words(filename):
+    char_count = 0
+    num_count = 0
+    word_count = 0
+
+    with open(filename, 'r', encoding='utf-8') as file:
+        for line in file:
+            char_count += len(line)
+            
+            num_count += len(re.findall(r'\d+', line))
+            
+            words = line.split()
+            word_count += len(words)
+
+    return char_count, num_count, word_count
+
+file_path = 'text_file.txt'
+
+char_count, num_count, word_count = count_chars_nums_words(file_path)
+
+print(f"Number of characters: {char_count}")
+print(f"Number of numbers: {num_count}")
+print(f"Number of words: {word_count}")
+***************************************************
+
+
+def calculate_similarity(file1, file2):
+    with open(file1, 'r', encoding='utf-8') as f1, open(file2, 'r', encoding='utf-8') as f2:
+        text1 = f1.read()
+        text2 = f2.read()
+
+        words1 = set(text1.split())
+        words2 = set(text2.split())
+
+        common_words = len(words1.intersection(words2))
+        total_words = len(words1) + len(words2)
+        similarity_index = common_words / total_words
+
+    return similarity_index
+
+file1_path = 'file1.txt'
+file2_path = 'file2.txt'
+
+similarity_index = calculate_similarity(file1_path, file2_path)
+
+print(f"Similarity Index: {similarity_index:.2%}")
+************************************************************************************
+
+
